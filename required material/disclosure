@@ -1,0 +1,22 @@
+# 
+
+**External datasets used:** None. Only the competition-provided
+`train.csv` and `test.csv` were used.
+
+**External code, notebooks, repositories, or public solutions consulted
+or adapted:** None identified in the provided files.
+
+**Pretrained models used:** None. Both the XGBoost and CatBoost models
+were trained from scratch on the competition training data.
+
+**AI tools or coding agents used:** Used ChatGPT as a support tool during the project to help explain modelling concepts, troubleshoot coding issues, suggest feature-engineering and model-evaluation ideas, and improve some notebook wording. I still implemented and tested the models myself, compared the results, selected the features and parameters, built the final ensemble, and interpreted the outputs.Used Claude to generate the templates of required materials.
+
+**Manual modification or post-processing of predictions:** None. The
+submitted probabilities are the direct output of the fixed weighted
+blend (0.2128 × XGBoost + 0.7872 × CatBoost) described in
+`Final_Model_Info.md`, with no manual editing, clipping, or thresholding
+applied afterwards.
+
+**Additional information used beyond the competition-provided files:**
+None identified — all feature engineering derives from columns already
+present in `train.csv`/`test.csv`.
