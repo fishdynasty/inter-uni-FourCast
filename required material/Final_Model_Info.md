@@ -1,0 +1,72 @@
+# Final Model Information
+
+## Model type
+
+A weighted linear blend of two gradient-boosted tree models, both trained
+from scratch on the competition data (no pretrained weights, no AutoML
+system).
+
+## Component 1 — Tuned XGBoost
+
+```python
+XGBClassifier(
+    n_estimators=500,
+    learning_rate=0.03,
+    max_depth=3,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    objective="binary:logistic",
+    eval_metric="logloss",
+    random_state=50,
+    n_jobs=-1,
+)
+```
+Preprocessing: one-hot encoding of `SEX`, `EDUCATION`, `MARRIAGE`; all
+other (engineered + raw numeric) columns passed through unchanged.
+
+- 5-fold CV log loss: 0.42538
+
+## Component 2 — Tuned CatBoost
+
+```python
+CatBoostClassifier(
+    iterations=700,
+    learning_rate=0.02,
+    depth=6,
+    loss_function="Logloss",
+    random_seed=50,
+    thread_count=-1,
+)
+```
+`cat_features=["SEX", "EDUCATION", "MARRIAGE"]` — CatBoost's native
+categorical handling is used; no manual encoding is applied for this
+model.
+
+- 5-fold CV log loss: 0.42435
+
+## Ensemble weights
+
+```
+final_probability = 0.2128142851 × XGBoost_probability
+                    + 0.7871857149 × CatBoost_probability
+```
+
+Weights were chosen by minimising binary log loss on out-of-fold
+predictions from both models using `scipy.optimize.minimize_scalar`
+(bounded search on the XGBoost weight, CatBoost weight = 1 − XGBoost
+weight). This is a fixed post-hoc weighting, not a learned meta-model.
+
+- Blended out-of-fold log loss: **0.42427** (best result across all
+  models and settings tested)
+
+## Feature set
+
+23 raw columns + 6 engineered features (`delayed_months`, `max_delay`,
+`avg_repayment_status`, `avg_bill`, `avg_payment`, `recent_utilisation`) —
+see `Methodology_Report.md` §4 for exact definitions.
+
+## Training data
+
+Both component models were refit on 100% of the 24,000-row training set
+before generating test-set predictions (i.e. the CV folds above were used
+only for model selection/tuning/weight-fitting, not for the final fit).
