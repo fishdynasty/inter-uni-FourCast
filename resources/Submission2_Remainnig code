@@ -1,0 +1,33 @@
+# Train final CatBoost model on all training data
+
+final_cat_model = CatBoostClassifier(
+    iterations=500,
+    learning_rate=0.03,
+    depth=5,
+    loss_function="Logloss",
+    verbose=0,
+    random_seed=50,
+    thread_count=-1
+)
+
+final_cat_model.fit(
+    X,
+    y,
+    cat_features=boost_categorical_cols
+)
+
+# Predict probability of default for the test set
+test_pred_cat = final_cat_model.predict_proba(X_test)[:, 1]
+
+print(test_pred_cat[:10])
+print(test_pred_cat.shape)
+
+# Create Kaggle submission
+submission_catboost = pd.DataFrame({
+    "client_id": test["client_id"],
+    "default_probability": test_pred_cat
+})
+
+submission_catboost.head()
+
+submission_catboost.to_csv("submission_catboost.csv", index=False)
